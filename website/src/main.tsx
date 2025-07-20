@@ -5,7 +5,7 @@ import App from "./App.tsx";
 import { LightVisionProvider } from "./contexts/LightVisionContext";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 
-const clientId = import.meta.env.GOOGLE_OAUTH_CLIENT_ID;
+const clientId = import.meta.env.VITE_APP_GOOGLE_OAUTH_CLIENT_ID;
 
 createRoot(document.getElementById("root")!).render(
   // <StrictMode>

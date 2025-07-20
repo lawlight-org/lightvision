@@ -22,9 +22,7 @@ export async function POST(
     Authorization: `Bearer ${token}`,
   };
 
-  if (type === "form") {
-    headers["Content-Type"] = "multipart/form-data";
-  } else {
+  if (type !== "form") {
     headers["Content-Type"] = "application/json";
   }
 

@@ -1,6 +1,8 @@
 import {
   createContext,
+  createRef,
   useEffect,
+  useRef,
   useState,
   type ChangeEvent,
   type FC,
@@ -24,16 +26,48 @@ export const LightVisionProvider: FC<{ children: ReactNode }> = ({
   const [loaded, setLoaded] = useState<boolean>(false);
   const [editing, setEditing] = useState<boolean>(false);
   const [reLogin, setReLogin] = useState<boolean>(false);
+  const filesRef = useRef<Record<string, File>>({});
 
-  const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      console.log(e.target.files);
-      var data = new FormData();
-      data.append("file", e.target.files[0]);
+  const makeImageEditable = (el: HTMLImageElement, dataLv: string) => {
+    // onclick create fake file input, click it and onchange set the src + ref
+    el.addEventListener("click", (e) => {
+      e.preventDefault();
 
-      const res = await POST("upload", data, "form");
-      console.log(res);
-    }
+      const input: HTMLInputElement = document.createElement("input");
+      input.type = "file";
+
+      input.addEventListener("change", async (e: any) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        console.log("=> uploaded file", file);
+
+        filesRef.current[dataLv] = file;
+
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => {
+          el.src = reader.result as string;
+        };
+        reader.onerror = (e) => {
+          console.log("Error", e);
+        };
+
+        // var data = new FormData();
+        // data.append("file", e.target.files[0]);
+        // data.append("dataLv", dataLv);
+        //
+        // const res = await POST("upload", data, "form");
+        // if (res.ok) {
+        //   const data = await res.json();
+        //   const tmpSubPath = data.message;
+        //   el.src = tmpSubPath;
+        // } else {
+        //   console.error("Failed to upload the file", res.status);
+        // }
+      });
+      input.click();
+    });
   };
 
   const makeEditable = () => {
@@ -42,28 +76,23 @@ export const LightVisionProvider: FC<{ children: ReactNode }> = ({
     const all: HTMLElement[] = Array.from(
       document.body.querySelectorAll<HTMLElement>("*"),
     );
-    console.log(all);
 
+    // loop through all elements
     for (const el of all) {
+      // make links not clickable
       if (el instanceof HTMLAnchorElement) {
         el.addEventListener("click", (e) => {
           e.preventDefault();
         });
       }
 
+      // make images clickable to upload and change them
       if (el instanceof HTMLImageElement) {
-        el.addEventListener("mouseover", (e) => {
-          console.log("hover");
-        });
+        const dataLv = el.getAttribute("data-lv");
+        if (!dataLv) return;
 
-        el.addEventListener("click", (e) => {
-          e.preventDefault();
+        makeImageEditable(el, dataLv);
 
-          const input = document.querySelector(
-            "#imgupload",
-          ) as HTMLInputElement | null;
-          input?.click();
-        });
         continue;
       }
 
@@ -115,7 +144,7 @@ export const LightVisionProvider: FC<{ children: ReactNode }> = ({
         const res = await fetch("/content.json");
         const parsed = await res.json();
 
-        console.log(parsed);
+        console.log("=> fetched content.json", parsed);
         setContent(parsed);
       } catch (e) {
         console.error(e);
@@ -145,22 +174,49 @@ export const LightVisionProvider: FC<{ children: ReactNode }> = ({
   }, [content]);
 
   const handleSave = async () => {
+    // scrape data-lvs from the site
     const lvElements: NodeListOf<HTMLElement> =
       document.querySelectorAll(`[data-lv]`);
 
     const content = Object.fromEntries(
-      Array.from(lvElements).map((ele: HTMLElement) => [
-        [ele.getAttribute("data-lv")],
-        ele.textContent,
-      ]),
+      Array.from(lvElements).map((el: HTMLElement) => {
+        const dataLv: string = el.getAttribute("data-lv") as string;
+
+        if (el instanceof HTMLImageElement) {
+          return [[dataLv], el.src];
+        } else {
+          return [[dataLv], el.textContent];
+        }
+      }),
     );
 
-    const res = await POST("save", content);
+    const uploadFiles = Object.entries(filesRef.current).map(
+      async ([dataLv, file]) => {
+        var formData = new FormData();
+        formData.append("file", file);
+        formData.append("dataLv", dataLv);
 
-    if (res.status === 401) {
-      console.error("Unauthorized");
-      return;
-    }
+        const uploadRes = await POST("upload", formData, "form");
+        if (uploadRes.ok) {
+          const data = await uploadRes.json();
+          const newSrc = data.message;
+          console.log(newSrc);
+
+          content[dataLv] = newSrc;
+
+          const el = document.querySelector(`[data-lv="${dataLv}"]`);
+          if (el instanceof HTMLImageElement) {
+            el.src = newSrc;
+          }
+        }
+      },
+    );
+
+    await Promise.all(uploadFiles);
+
+    console.log("=> saving content", content);
+
+    const res = await POST("save", content);
 
     if (!res.ok) {
       setReLogin(true);
@@ -191,14 +247,6 @@ export const LightVisionProvider: FC<{ children: ReactNode }> = ({
 
   return (
     <LightVision.Provider value={{ content, setEditing, login, makeEditable }}>
-      <input
-        type="file"
-        id="imgupload"
-        name="file"
-        onChange={handleFileChange}
-        style={{ display: "none" }}
-      />
-
       {children}
 
       {editing && (

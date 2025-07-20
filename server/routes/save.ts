@@ -22,15 +22,15 @@ export const post = async (req: any) => {
     const contentFile = Bun.file(config.website_path + "public/content.json");
     const currentContent = await contentFile.json();
 
-    console.log("\nIncoming", incomingContent);
-    console.log("Current", currentContent);
+    // console.log("\nIncoming", incomingContent);
+    // console.log("Current", currentContent);
 
     // hashmapping so no only corresponding ones are changed, no new data
     for (const key of Object.keys(currentContent)) {
       currentContent[key] = incomingContent[key];
     }
 
-    console.log("Updated", currentContent);
+    // console.log("Updated", currentContent);
 
     // write to file
     await Bun.write(contentFile, JSON.stringify(currentContent));

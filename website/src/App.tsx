@@ -15,7 +15,12 @@ function App() {
           <img className="logo" alt="Vite logo" data-lv="$heroimg" />
         </a>
         <a href="https://react.dev" target="_blank">
-          {/* <img src={reactLogo} className="logo react" alt="React logo" /> */}
+          <img
+            src={reactLogo}
+            className="logo react"
+            alt="React logo"
+            data-lv="$heroimg2"
+          />
         </a>
       </div>
       <h1 data-lv="$title"></h1>
