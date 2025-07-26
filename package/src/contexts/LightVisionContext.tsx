@@ -95,19 +95,19 @@ export const LightVision: FC<{ children: ReactNode }> = ({ children }) => {
   };
 
   const makeEditable = () => {
-    toast.success("Editing Mode Enabled");
+    toast.success("Editing mode enabled");
     // set editing to true to make gui visible
     setEditing(true);
 
     // get all elements and loop through them
-    const all: HTMLElement[] = Array.from(
-      document.body.querySelectorAll<HTMLElement>("*"),
-    );
+    // const all: HTMLElement[] = Array.from(
+    //   document.body.querySelectorAll<HTMLElement>("*"),
+    // );
 
     // get all elements with data-lv attribute and loop through them
-    // const all: HTMLElement[] = Array.from(
-    //   document.body.querySelectorAll<HTMLElement>("[data-lv]"),
-    // );
+    const all: HTMLElement[] = Array.from(
+      document.body.querySelectorAll<HTMLElement>("[data-lv]"),
+    );
 
     for (let el of all) {
       // make links not clickable
@@ -123,8 +123,7 @@ export const LightVision: FC<{ children: ReactNode }> = ({ children }) => {
       // make images clickable to upload and change them
       if (el instanceof HTMLImageElement) {
         const dataLv = el.getAttribute("data-lv");
-        // if (!dataLv) continue;
-
+        if (!dataLv) continue;
         el.classList.add("lv-image");
 
         makeImageEditable(el, dataLv);
