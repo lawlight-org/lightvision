@@ -1,28 +1,28 @@
+import React from "react";
 import {
   createContext,
-  createRef,
   useEffect,
   useRef,
   useState,
-  type ChangeEvent,
   type FC,
   type ReactNode,
 } from "react";
 import type { LightVisionType } from "../types/LightVisionType";
-import { useGoogleLogin } from "@react-oauth/google";
-import { GET, POST } from "../api/api";
+import { POST } from "../api/api";
+import { login } from "../services/auth";
 
-export const LightVision = createContext<LightVisionType>({
+export const LightVisionContext = createContext<LightVisionType>({
   content: {},
   setEditing: () => {},
   login: () => {},
   makeEditable: () => {},
+  reLogin: false,
+  setReLogin: () => {},
+  handleSave: () => {},
 });
 
-export const LightVisionContext: FC<{ children: ReactNode }> = ({
-  children,
-}) => {
-  const [content, setContent] = useState(null);
+export const LightVision: FC<{ children: ReactNode }> = ({ children }) => {
+  const [content, setContent] = useState({});
   const [loaded, setLoaded] = useState<boolean>(false);
   const [editing, setEditing] = useState<boolean>(false);
   const [reLogin, setReLogin] = useState<boolean>(false);
@@ -77,8 +77,10 @@ export const LightVisionContext: FC<{ children: ReactNode }> = ({
       document.body.querySelectorAll<HTMLElement>("*"),
     );
 
+    console.log("=> Making elements editable");
+
     // loop through all elements
-    for (const el of all) {
+    for (let el of all) {
       // make links not clickable
       if (el instanceof HTMLAnchorElement) {
         el.addEventListener("click", (e) => {
@@ -89,7 +91,7 @@ export const LightVisionContext: FC<{ children: ReactNode }> = ({
       // make images clickable to upload and change them
       if (el instanceof HTMLImageElement) {
         const dataLv = el.getAttribute("data-lv");
-        if (!dataLv) return;
+        if (!dataLv) continue;
 
         makeImageEditable(el, dataLv);
 
@@ -103,39 +105,6 @@ export const LightVisionContext: FC<{ children: ReactNode }> = ({
       el.contentEditable = "true";
     }
   };
-
-  const login = useGoogleLogin({
-    onSuccess: async (tokenResponse: any) => {
-      // save token in localstorage to send it to the api
-      localStorage.setItem("goauth_access_token", tokenResponse.access_token);
-
-      // reauth if expired
-      if (reLogin) {
-        setReLogin(false);
-        handleSave();
-        return;
-      }
-
-      try {
-        const res = await GET("auth");
-
-        if (!res.ok) {
-          localStorage.removeItem("goauth_access_token");
-          return false;
-        }
-
-        // make content editable
-        makeEditable();
-
-        console.log(tokenResponse);
-
-        return true;
-      } catch (e) {
-        console.error(e);
-        return false;
-      }
-    },
-  });
 
   // fetch content
   useEffect(() => {
@@ -218,6 +187,17 @@ export const LightVisionContext: FC<{ children: ReactNode }> = ({
 
     const res = await POST("save", content);
 
+    if (res.status === 404) {
+      console.error("Make sure the server is running");
+      return;
+    }
+
+    if (res.status === 401) {
+      setReLogin(true);
+      login();
+      return;
+    }
+
     if (!res.ok) {
       setReLogin(true);
       login();
@@ -246,7 +226,17 @@ export const LightVisionContext: FC<{ children: ReactNode }> = ({
   }
 
   return (
-    <LightVision.Provider value={{ content, setEditing, login, makeEditable }}>
+    <LightVisionContext.Provider
+      value={{
+        content,
+        setEditing,
+        login,
+        makeEditable,
+        reLogin,
+        setReLogin,
+        handleSave,
+      }}
+    >
       {children}
 
       {editing && (
@@ -302,6 +292,6 @@ export const LightVisionContext: FC<{ children: ReactNode }> = ({
           </button>
         </div>
       )}
-    </LightVision.Provider>
+    </LightVisionContext.Provider>
   );
 };
