@@ -8,8 +8,8 @@ import {
   type ReactNode,
 } from "react";
 import type { LightVisionType } from "../types/LightVisionType";
-import { POST } from "../api/api";
-import { login } from "../services/auth";
+import { GET, POST } from "../api/api";
+import { useGoogleLogin } from "@react-oauth/google";
 import "../LightVision.css";
 import toast from "react-hot-toast";
 
@@ -29,6 +29,39 @@ export const LightVision: FC<{ children: ReactNode }> = ({ children }) => {
   const [editing, setEditing] = useState<boolean>(false);
   const [reLogin, setReLogin] = useState<boolean>(false);
   const filesRef = useRef<Record<string, File>>({});
+
+  const login = useGoogleLogin({
+    onSuccess: async (tokenResponse: any) => {
+      // save token in localstorage to send it to the api
+      localStorage.setItem("goauth_access_token", tokenResponse.access_token);
+
+      // reauth if expired
+      if (reLogin) {
+        setReLogin(false);
+        handleSave();
+        return;
+      }
+
+      try {
+        const res = await GET("auth");
+
+        if (!res.ok) {
+          localStorage.removeItem("goauth_access_token");
+          return false;
+        }
+
+        // make content editable
+        makeEditable();
+
+        console.log(tokenResponse);
+
+        return true;
+      } catch (e) {
+        console.error(e);
+        return false;
+      }
+    },
+  });
 
   const makeImageEditable = (el: HTMLImageElement, dataLv: string) => {
     el.addEventListener("click", (e) => {
@@ -67,19 +100,16 @@ export const LightVision: FC<{ children: ReactNode }> = ({ children }) => {
     setEditing(true);
 
     // get all elements and loop through them
-    // const all: HTMLElement[] = Array.from(
-    //   document.body.querySelectorAll<HTMLElement>("*"),
-    // );
-
-    // get all elements with data-lv attribute and loop through them
     const all: HTMLElement[] = Array.from(
-      document.body.querySelectorAll<HTMLElement>("[data-lv]"),
+      document.body.querySelectorAll<HTMLElement>("*"),
     );
 
-    for (let el of all) {
-      const dataLv = el.getAttribute("data-lv");
-      if (!dataLv) continue;
+    // get all elements with data-lv attribute and loop through them
+    // const all: HTMLElement[] = Array.from(
+    //   document.body.querySelectorAll<HTMLElement>("[data-lv]"),
+    // );
 
+    for (let el of all) {
       // make links not clickable
       if (
         el instanceof HTMLAnchorElement &&
@@ -92,8 +122,12 @@ export const LightVision: FC<{ children: ReactNode }> = ({ children }) => {
 
       // make images clickable to upload and change them
       if (el instanceof HTMLImageElement) {
-        makeImageEditable(el, dataLv);
+        const dataLv = el.getAttribute("data-lv");
+        // if (!dataLv) continue;
 
+        el.classList.add("lv-image");
+
+        makeImageEditable(el, dataLv);
         continue;
       }
 
@@ -152,11 +186,6 @@ export const LightVision: FC<{ children: ReactNode }> = ({ children }) => {
 
     try {
       const res = await POST("save", content);
-
-      if (res.status === 404) {
-        toast.error("Make sure the server is running");
-        return;
-      }
 
       if (res.status === 401) {
         setReLogin(true);
