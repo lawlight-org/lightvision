@@ -6,7 +6,7 @@ Built with [Bun](https://bun.sh/) and [React](https://react.dev/).
 
 ---
 
-## ⚙️ Server Setup
+## Server Setup
 
 ```bash
 git clone https://github.com/lawlight-org/lightvision
@@ -41,7 +41,7 @@ bun run index.ts
 
 ---
 
-## 🌐 Website Setup
+## Website Setup
 
 Install the package:
 
@@ -69,7 +69,7 @@ import { LightVisionProvider } from "lightvision";
 
 ---
 
-## 🗂 File Structure
+## File Structure
 
 Your public folder should look like:
 
@@ -83,7 +83,7 @@ public/
 
 ---
 
-## 🖱 Make Elements Editable
+## Make Elements Editable
 
 Add `data-lv="$yourKey"` to any element you want to be editable.
 
@@ -98,5 +98,3 @@ Then map the keys in `content.json`:
   "$myimage": "assets/img/lawlight.png"
 }
 ```
-
----
