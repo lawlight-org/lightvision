@@ -1,7 +1,8 @@
 # LightVision
 
-**The easiest and lightest CMS for static websites.**  
-Make any text or image editable just by adding one attribute. Works with your existing HTML and static files.
+**Most lightweight and easy to use CMS.**  
+Make any text or image editable just by adding one attribute.  
+Built with [Bun](https://bun.sh/) and [React](https://react.dev/).
 
 ---
 
@@ -53,7 +54,7 @@ Use the login component:
 ```js
 import { AdminLogin } from "lightvision";
 
-<AdminLogin />
+<AdminLogin />;
 ```
 
 Wrap your app with the provider:
@@ -63,7 +64,7 @@ import { LightVisionProvider } from "lightvision";
 
 <LightVisionProvider clientId={import.meta.env.VITE_APP_GOOGLE_OAUTH_CLIENT_ID}>
   <App />
-</LightVisionProvider>
+</LightVisionProvider>;
 ```
 
 ---
@@ -84,10 +85,10 @@ public/
 
 ## 🖱 Make Elements Editable
 
-Add `data-lv="yourKey"` to any element you want to be editable.
+Add `data-lv="$yourKey"` to any element you want to be editable.
 
 ```html
-<img src="assets/img/lawlight.png" data-lv="myimage" />
+<img src="assets/img/lawlight.png" data-lv="$myimage" />
 ```
 
 Then map the keys in `content.json`:
@@ -99,6 +100,3 @@ Then map the keys in `content.json`:
 ```
 
 ---
-
-## 🔥 Built with [Bun](https://bun.sh)  
-Ultra-fast JavaScript runtime powering the backend.
