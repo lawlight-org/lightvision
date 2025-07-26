@@ -1,0 +1,44 @@
+.lv-nav {
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  margin: 0.5rem;
+  display: flex;
+  gap: 0.25rem;
+
+  .lv-save-button,
+  .lv-cancel-button {
+    width: 50px;
+    height: 50px;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 10px;
+    transition: all 0.1s ease-in-out;
+    z-index: 2147483647;
+
+    svg {
+      width: 24px;
+      height: 24px;
+      fill: white;
+    }
+  }
+
+  .lv-save-button:hover,
+  .lv-cancel-button:hover {
+    opacity: 75%;
+  }
+
+  .lv-save-button {
+    background: #52c727;
+  }
+
+  .lv-cancel-button {
+    background: #aeaeae;
+  }
+}
+
+.lv-link {
+  text-decoration: underline;
+}

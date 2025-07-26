@@ -9,7 +9,7 @@
     "require": "./dist/index.js"
   },
   "scripts": {
-    "build": "babel src --extensions \".ts,.tsx\" --out-dir dist"
+    "build": "babel src --extensions \".ts,.tsx\" --out-dir dist && cp src/*.css dist/"
   },
   "author": "lawlight.org",
   "license": "ISC",
@@ -19,15 +19,17 @@
     "@babel/preset-env": "^7.28.0",
     "@babel/preset-react": "^7.27.1",
     "@babel/preset-typescript": "^7.27.1",
-    "react": "^19.1.0",
-    "react-dom": "^19.1.0"
+    "@react-oauth/google": "^0.12.2",
+    "react-hot-toast": "^2.5.2"
   },
   "peerDependencies": {
-    "@react-oauth/google": "^0.12.2",
+    "@types/react": "^19.1.8",
     "react": "^19.1.0",
     "react-dom": "^19.1.0"
   },
   "devDependencies": {
-    "@types/react": "^19.1.8"
+    "@types/react": "^19.1.8",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
   }
 }
