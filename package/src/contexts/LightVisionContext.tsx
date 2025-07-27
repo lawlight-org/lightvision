@@ -95,6 +95,16 @@ export const LightVision: FC<{ children: ReactNode }> = ({ children }) => {
   };
 
   const makeEditable = () => {
+    // enable editing mode only if logged in
+    if (!localStorage.getItem("goauth_access_token")) {
+      toast.error("You are not logged in");
+      return;
+    }
+
+    if (editing) {
+      return;
+    }
+
     toast.success("Editing mode enabled");
     // set editing to true to make gui visible
     setEditing(true);
@@ -157,6 +167,7 @@ export const LightVision: FC<{ children: ReactNode }> = ({ children }) => {
       }),
     );
 
+    // map files to data-lvs and upload them
     const uploadFiles = Object.entries(filesRef.current).map(
       async ([dataLv, file]) => {
         var formData = new FormData();
@@ -167,10 +178,10 @@ export const LightVision: FC<{ children: ReactNode }> = ({ children }) => {
         if (uploadRes.ok) {
           const data = await uploadRes.json();
           const newSrc = data.message;
-          console.log(newSrc);
 
           content[dataLv] = newSrc;
 
+          // update image locally
           const el = document.querySelector(`[data-lv="${dataLv}"]`);
           if (el instanceof HTMLImageElement) {
             el.src = newSrc;
@@ -179,10 +190,10 @@ export const LightVision: FC<{ children: ReactNode }> = ({ children }) => {
       },
     );
 
+    // wait for all files to be uploaded
     await Promise.all(uploadFiles);
 
-    console.log("=> saving content", content);
-
+    // save content
     try {
       const res = await POST("save", content);
 

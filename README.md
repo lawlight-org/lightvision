@@ -6,6 +6,48 @@ Built with [Bun](https://bun.sh/) and [React](https://react.dev/).
 
 ---
 
+## Website Setup
+
+Install the package:
+
+```bash
+npm i lightvision
+```
+
+Wrap your app with the provider:
+
+```js
+import { LightVisionProvider } from "lightvision";
+
+<LightVisionProvider clientId={import.meta.env.VITE_APP_GOOGLE_OAUTH_CLIENT_ID}>
+  <App />
+</LightVisionProvider>;
+```
+
+Use the login component:
+
+```js
+import { AdminLogin } from "lightvision";
+
+<AdminLogin />;
+```
+
+---
+
+## File Structure
+
+Your public folder should look like:
+
+```
+public/
+├── assets/
+│   ├── img/
+│   └── vid/
+└── content.json
+```
+
+---
+
 ## Server Setup
 
 ```bash
@@ -37,48 +79,6 @@ Run the server:
 
 ```bash
 bun run index.ts
-```
-
----
-
-## Website Setup
-
-Install the package:
-
-```bash
-npm i lightvision
-```
-
-Use the login component:
-
-```js
-import { AdminLogin } from "lightvision";
-
-<AdminLogin />;
-```
-
-Wrap your app with the provider:
-
-```js
-import { LightVisionProvider } from "lightvision";
-
-<LightVisionProvider clientId={import.meta.env.VITE_APP_GOOGLE_OAUTH_CLIENT_ID}>
-  <App />
-</LightVisionProvider>;
-```
-
----
-
-## File Structure
-
-Your public folder should look like:
-
-```
-public/
-├── assets/
-│   ├── img/
-│   └── vid/
-└── content.json
 ```
 
 ---

@@ -2,13 +2,12 @@ import React from "react";
 import { useLightVision } from "../hooks/useLightVision";
 
 export const AdminLogin = () => {
-  const { makeEditable, login } = useLightVision();
+  const { login } = useLightVision();
 
   return (
     <button
       onClick={() => {
-        // login();
-        makeEditable();
+        login();
       }}
     >
       Admin Login
